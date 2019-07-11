@@ -1,0 +1,10 @@
+name: RucksackPlugin
+version: 1.0
+author: NoPrefix
+main: de.horstblocks.rucksack.RucksackPlugin
+
+commands:
+  rucksack:
+    using: /rucksack [Player]
+    permission: horstblocks.commands.rucksack
+    aliases: [backpack]
