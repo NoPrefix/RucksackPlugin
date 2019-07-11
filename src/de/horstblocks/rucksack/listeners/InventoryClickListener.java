@@ -18,6 +18,10 @@ public class InventoryClickListener implements Listener {
 		}
 
 		Player player = (Player) event.getWhoClicked();
+		
+		if (!RucksackPlugin.getPlugin().usingBackpack.contains(player)) {
+			return;
+		}
 
 		try {
 		if (event.getView().getTitle().startsWith("§aDeine Rucksäcke")) {
@@ -29,6 +33,7 @@ public class InventoryClickListener implements Listener {
 				return;
 			} else if (event.getCurrentItem().getItemMeta().getDisplayName().startsWith("§aRucksack")) {
 				int index = Integer.parseInt(event.getCurrentItem().getItemMeta().getDisplayName().split(" ")[1]);
+				player.closeInventory();
 				player.openInventory(RucksackPlugin.getPlugin().getCache().get(player)
 						.get(index-1)
 						.getInhalt());
