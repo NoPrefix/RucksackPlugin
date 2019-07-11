@@ -21,11 +21,11 @@ public class ConfigManager {
 		
 		RucksackPlugin plugin = RucksackPlugin.getPlugin();
 		
-		plugin.MySQL_HOST = config.getString("MySQL.Host");
-		plugin.MySQL_PORT = config.getString("MySQL.Port");
-		plugin.MySQL_USERNAME = config.getString("MySQL.Username");
-		plugin.MySQL_PASSWORD = config.getString("MySQL.Password");
-		plugin.MySQL_DATABASE = config.getString("MySQL.Database");
+		plugin.mySqlHost = config.getString("MySQL.Host");
+		plugin.mySqlPort = config.getString("MySQL.Port");
+		plugin.mySqlUsername = config.getString("MySQL.Username");
+		plugin.mySqlPassword = config.getString("MySQL.Password");
+		plugin.mySqlDatabase = config.getString("MySQL.Database");
 		
 	}
 	

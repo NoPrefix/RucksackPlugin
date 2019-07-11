@@ -17,7 +17,7 @@ import de.horstblocks.rucksack.utils.Rucksack;
 
 public class RucksackPlugin extends JavaPlugin {
 	
-	public String MySQL_HOST, MySQL_USERNAME, MySQL_PASSWORD, MySQL_DATABASE, MySQL_PORT;
+	public String mySqlHost, mySqlUsername, mySqlPassword, mySqlDatabase, mySqlPort;
 	
 	private static RucksackPlugin rucksackPlugin;
 	
@@ -50,7 +50,7 @@ public class RucksackPlugin extends JavaPlugin {
 		mysql = new MySQL();
 				
 		new ConfigManager().loadConfig();
-		if(!mysql.connect(MySQL_HOST, MySQL_PORT, MySQL_DATABASE, MySQL_USERNAME, MySQL_PASSWORD)) {
+		if(!mysql.connect(mySqlHost, mySqlPort, mySqlDatabase, mySqlUsername, mySqlPassword)) {
 			System.err.println("[RucksackPlugin] Die MySQL-Daten konnten nicht geladen werden, das Plugin wird deaktiviert.");
 			Bukkit.getPluginManager().disablePlugin(this);
 			return;
