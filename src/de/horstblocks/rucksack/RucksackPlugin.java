@@ -41,7 +41,7 @@ public class RucksackPlugin extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		Bukkit.getOnlinePlayers().forEach((player) -> {
-			for (int i = 1; i <= 5; i++) {
+			for (int i = 1; i <= maxBackpacks; i++) {
 				try {
 					RucksackPlugin.getPlugin().getMysql().setRucksackInhalt(player.getUniqueId().toString(), i,
 							RucksackPlugin.getPlugin().getCache().get(player).get(i - 1));
