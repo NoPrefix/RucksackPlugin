@@ -14,8 +14,9 @@ public class PlayerJoinListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		ArrayList<Rucksack> backpacks = new ArrayList<>();
-		for (int i = 1; i <= 5; i++) {
-			backpacks.add(RucksackPlugin.getPlugin().getMysql().getRucksackInhalt(event.getPlayer().getUniqueId().toString(), i));
+		for (int i = 1; i <= RucksackPlugin.getPlugin().maxBackpacks; i++) {
+			backpacks.add(RucksackPlugin.getPlugin().getMysql()
+					.getRucksackInhalt(event.getPlayer().getUniqueId().toString(), i));
 		}
 		RucksackPlugin.getPlugin().getCache().put(event.getPlayer(), backpacks);
 	}

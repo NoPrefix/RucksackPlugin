@@ -28,30 +28,40 @@ public class RucksackCommand implements CommandExecutor {
 		Player player = (Player) commandSender;
 
 		if (arguments.length == 0) {
-			Inventory backpacks = Bukkit.createInventory(null, 9 * 3, "Â§aDeine RucksÃ¤cke");
+			Inventory backpacks = Bukkit.createInventory(null, 9 * ((RucksackPlugin.getPlugin().maxBackpacks/9)+1), "§aDeine Rucksäcke");
 
 			ItemStack noPermission = new ItemStack(Material.REDSTONE);
 			ItemMeta noPermissionMeta = noPermission.getItemMeta();
-			noPermissionMeta.setDisplayName("Â§cRucksack");
+			noPermissionMeta.setDisplayName("§cRucksack");
 			ArrayList<String> lore = new ArrayList<>();
-			lore.add("Â§cKeine Rechte!");
+			lore.add("§cKeine Rechte!");
 			noPermissionMeta.setLore(lore);
 			noPermission.setItemMeta(noPermissionMeta);
 
-			for (int i = 11; i <= 15; i++) {
+			for (int i = 0; i < RucksackPlugin.getPlugin().maxBackpacks; i++) {
 				backpacks.setItem(i, noPermission);
 			}
 
 			ItemStack usableBackpack = new ItemStack(Material.CHEST);
 			ItemMeta usableBackpackMeta = usableBackpack.getItemMeta();
-			usableBackpackMeta.setDisplayName("Â§aRucksack %");
+			usableBackpackMeta.setDisplayName("§aRucksack %");
 			ArrayList<String> usableLore = new ArrayList<>();
-			usableLore.add("Â§aBenutzbar!");
-			usableLore.add("Â§7Linksklick Â§8= Â§aÃ¶ffnen");
+			usableLore.add("§aBenutzbar!");
+			usableLore.add("§7Linksklick §8= §aöffnen");
 			usableBackpackMeta.setLore(usableLore);
 			usableBackpack.setItemMeta(usableBackpackMeta);
 
-			if (player.hasPermission("horstblock.rucksack.1")) {
+			for(int i = 1; i <= RucksackPlugin.getPlugin().maxBackpacks; i++) {
+				if(player.hasPermission("horstblocks.rucksack." + i)) {
+					ItemStack usable = usableBackpack.clone();
+					ItemMeta usableMetaNew = usable.getItemMeta();
+					usableMetaNew.setDisplayName(usableMetaNew.getDisplayName().replace("%", String.valueOf(i)));
+					usable.setItemMeta(usableMetaNew);
+					backpacks.setItem(i - 1, usable);
+				}
+			}
+			
+			/*if (player.hasPermission("horstblock.rucksack.1")) {
 				ItemMeta backbackMeta = usableBackpack.getItemMeta();
 				backbackMeta.setDisplayName(backbackMeta.getDisplayName().replace('%', '1'));
 				usableBackpack.setItemMeta(backbackMeta);
@@ -84,7 +94,7 @@ public class RucksackCommand implements CommandExecutor {
 				backbackMeta.setDisplayName(backbackMeta.getDisplayName().replace('4', '5'));
 				usableBackpack.setItemMeta(backbackMeta);
 				backpacks.setItem(15, usableBackpack);
-			}
+			}*/
 
 			player.openInventory(backpacks);
 			player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1f, 1f);

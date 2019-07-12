@@ -20,17 +20,18 @@ public class MySQL {
 		return this.ic;
 	}
 
-	public boolean connect(String HOST, String PORT, String DATABASE, String USER, String PASSWORD) {
+	public boolean connect(String host, String port, String database, String user, String password) {
 		if (!isConnected()) {
 			try {
+				Class.forName("com.mysql.jdbc.Driver");
 				con = DriverManager.getConnection(
-						"jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE + "?autoReconnect=true&useSSL=false", USER,
-						PASSWORD);
+						"jdbc:mysql://" + host + ":" + port + "/" + database + "?autoReconnect=true&useSSL=false", user,
+						password);
 				Bukkit.getLogger().info("Die Datenbankverbindung wurde erfolgreich hergestellt!");
 				ic = true;
 				createTable();
 				return true;
-			} catch (SQLException e) {
+			} catch (SQLException | ClassNotFoundException e) {
 				e.printStackTrace();
 				Bukkit.getLogger().info("Die Datenbankverbindung konnte nicht hergestellt werden!");
 				Bukkit.getLogger().info("Fehler: ");
@@ -58,7 +59,7 @@ public class MySQL {
 	}
 
 	public void update(String qry) {
-		Bukkit.getScheduler().runTaskAsynchronously(RucksackPlugin.getPlugin(), () -> {
+		RucksackPlugin.getPlugin().executorService.execute(() -> {
 			try {
 				Statement st = con.createStatement();
 				st.executeUpdate(qry);
@@ -70,10 +71,11 @@ public class MySQL {
 	}
 
 	public ResultSet getResult(String qry) {
-		
 		ResultSet rs = null;
+
 		try {
-			Statement st = con.createStatement();
+			Statement st;
+			st = con.createStatement();
 			rs = st.executeQuery(qry);
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -82,14 +84,25 @@ public class MySQL {
 	}
 
 	public void createTable() {
-		update("CREATE TABLE IF NOT EXISTS backpacks(Name VARCHAR(16), UUID VARCHAR(64), "
-				+ "Rucksack1 TEXT, Rucksack2 TEXT, Rucksack3 TEXT, Rucksack4 TEXT, Rucksack5 TEXT);");
+		String start = "CREATE TABLE IF NOT EXISTS backpacks(Name VARCHAR(16), UUID VARCHAR(64)";
+		String end = ", PRIMARY KEY (UUID));";
+
+		String query = start;
+
+		for (int i = 1; i <= RucksackPlugin.getPlugin().maxBackpacks; i++) {
+			query += ", Rucksack" + i + " TEXT";
+		}
+
+		query += end;
+
+		System.out.println("[" + query + "]");
+
+		update(query);
 	}
 
-	public boolean existPlayerName(String uuid) {
+	public boolean existPlayer(String uuid) {
 		try {
 			ResultSet rs = getResult("SELECT Name FROM backpacks WHERE UUID = '" + uuid + "'");
-			System.out.print("" + rs);
 			if (rs.next()) {
 				rs.close();
 				return true;
@@ -104,11 +117,33 @@ public class MySQL {
 
 	public void createPlayer(String name, String uuid) {
 		Inventory newInventory = Bukkit.createInventory(null, 9 * 3);
-		String clearInventory = InventoryConverter.InventoryToString(newInventory);
-		if (!existPlayerName(uuid)) {
-			update("INSERT INTO backpacks(Name, UUID, Rucksack1, Rucksack2, Rucksack3, Rucksack4, Rucksack5) VALUES ('"
-					+ name + "', '" + uuid + "', '" + clearInventory + "', '" + clearInventory + "', '" + clearInventory
-					+ "', '" + clearInventory + "', '" + clearInventory + "');");
+		String clearInventory = InventoryConverter.inventoryToString(newInventory);
+		if (!existPlayer(uuid)) {
+
+			String start = "INSERT INTO backpacks(Name, UUID";
+
+			String query = start;
+
+			for (int i = 1; i <= RucksackPlugin.getPlugin().maxBackpacks; i++) {
+				query += ", Rucksack" + i;
+			}
+
+			query += ") VALUES ('" + name + "', '" + uuid;
+
+			for (int i = 1; i <= RucksackPlugin.getPlugin().maxBackpacks; i++) {
+				query += "', '" + clearInventory;
+			}
+
+			query += "');";
+
+			/*
+			 * update("INSERT INTO backpacks(Name, UUID, Rucksack1, Rucksack2, Rucksack3, Rucksack4, Rucksack5) VALUES ('"
+			 * + name + "', '" + uuid + "', '" + clearInventory + "', '" + clearInventory +
+			 * "', '" + clearInventory + "', '" + clearInventory + "', '" + clearInventory +
+			 * "');");
+			 */
+
+			update(query);
 		}
 	}
 
@@ -117,9 +152,11 @@ public class MySQL {
 		try {
 			ResultSet rs = getResult("SELECT * FROM backpacks WHERE UUID = '" + uuid + "'");
 			if (!rs.next() || String.valueOf(rs.getString("Name")) == null) {
+				rs.close();
 				return "0";
 			}
 			i = rs.getString("NAME");
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -130,14 +167,15 @@ public class MySQL {
 		String inhalt = null;
 		UUID id = UUID.fromString(uuid);
 		String name = Bukkit.getOfflinePlayer(id).getName();
-		if (existPlayerName(uuid)) {
+		if (existPlayer(uuid)) {
 			try {
 				ResultSet rs = getResult("SELECT * FROM backpacks WHERE UUID = '" + uuid + "'");
 				if (!rs.next() || rs.getString("Rucksack" + rucksack) == null) {
 					return null;
 				}
 				inhalt = rs.getString("Rucksack" + rucksack);
-				return new Rucksack(Bukkit.getPlayer(id), rucksack, InventoryConverter.StringToInventory(inhalt));
+				rs.close();
+				return new Rucksack(Bukkit.getPlayer(id), rucksack, InventoryConverter.stringToInventory(inhalt));
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -148,10 +186,10 @@ public class MySQL {
 	}
 
 	public void setRucksackInhalt(String uuid, int rucksackID, Rucksack rucksack) {
-		String inhalt = InventoryConverter.InventoryToString(rucksack.getInhalt());
+		String inhalt = InventoryConverter.inventoryToString(rucksack.getInhalt());
 		UUID id = UUID.fromString(uuid);
 		String name = Bukkit.getOfflinePlayer(id).getName();
-		if (existPlayerName(uuid)) {
+		if (existPlayer(uuid)) {
 			update("UPDATE backpacks SET Rucksack" + rucksackID + "= '" + inhalt + "' WHERE UUID= '" + uuid + "';");
 		} else {
 			createPlayer(name, uuid);

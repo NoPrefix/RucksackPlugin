@@ -8,7 +8,7 @@ public class Rucksack {
 	private Player holder;
 	private int id;
 	private Inventory inhalt;
-	
+
 	public Rucksack(Player holder, int id, Inventory inhalt) {
 		this.holder = holder;
 		this.id = id;
@@ -38,5 +38,5 @@ public class Rucksack {
 	public void setInhalt(Inventory inhalt) {
 		this.inhalt = inhalt;
 	}
-	
+
 }

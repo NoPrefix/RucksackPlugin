@@ -10,9 +10,9 @@ public class PlayerQuitListener implements Listener {
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		for (int i = 1; i <= 5; i++) {
+		for (int i = 1; i <= RucksackPlugin.getPlugin().maxBackpacks; i++) {
 			RucksackPlugin.getPlugin().getMysql().setRucksackInhalt(event.getPlayer().getUniqueId().toString(), i,
-					RucksackPlugin.getPlugin().getCache().get(event.getPlayer()).get(i-1));
+					RucksackPlugin.getPlugin().getCache().get(event.getPlayer()).get(i - 1));
 		}
 		RucksackPlugin.getPlugin().getCache().remove(event.getPlayer());
 	}
